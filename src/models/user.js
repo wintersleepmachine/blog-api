@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true,
         trim: true,
-        validate(value){
+        validate(value){ //Using validatorjs to determine if value is email
             if(!validator.isEmail(value)){
                 throw new Error('Email not valid')
             }
@@ -37,10 +37,10 @@ const userSchema = new mongoose.Schema({
         trim: true,
         default: 'About me...'
     },
-    subscribedTo: [
+    subscribedTo: [ //User will store an array of user IDs the logged in user is subscribed to. 
         {type:mongoose.Schema.Types.ObjectId}
     ],
-    tokens: [{
+    tokens: [{ //Array of stored tokens.
         token:{
             type:String,
             required: true
@@ -56,20 +56,19 @@ userSchema.statics.findByCredentials = async (email, password) => {
         const user = await User.findOne({email})// First find user by the email
 
         if(!user){
-            res.status(404).send('Email does not exist')
+            res.status(404).send('Invalid credentials') //Give minimal information as possible
         }
 
         const isMatch = await bcrypt.compare(password, user.password) // Next compare if users input password matches the hashed password stored int he database
 
         if(!isMatch){
-            res.status(403).send('Invalid Credentials')
+            res.status(403).send('Invalid Credentials')//Give minimal information as possible
         }
         return user
 
     }catch (e){
         res.status(500).send(e)
     }
-    const user = await User.findOne({email})
 }
 
 
@@ -89,18 +88,19 @@ userSchema.methods.generateAuthToken = async function(){
     }
 }
 
-
-userSchema.pre('save', async function(req, res, next){
+// The users password is modifed during two events: Creating a user AND a user updating their password.
+userSchema.pre('save', async function(req, res, next){ 
     const user = this
 
     if(user.isModified('password')){
-        user.password = await bcrypt.hash(user.password, 8)
+        user.password = await bcrypt.hash(user.password, 8) //Hash the typed password and setting the user.password property to the hashed value
     }
 
     next()
 })
 
-userSchema.methods.toJSON = function(){
+userSchema.methods.toJSON = function(){ //Whenever res.send() is called, mongoose calls toJSON behind the scenes. Here we can modify the object before it 
+                                        //is converted to JSON.
     const user = this
     const userObj = user.toObject()
 

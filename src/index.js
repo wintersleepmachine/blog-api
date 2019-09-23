@@ -5,15 +5,13 @@
 //View another persons public profile => DONE
 //Add owner property to blog model => DONE
 //Set up route for user to get all their own blogs => DONE
-
-//Get blogs from all owners the user is subscribed to 
-
+//Get blogs from all owners the user is subscribed to => DONE
 //add Auth to all needed routes => DONE
 //Set up route to get another users profile => DONE
 //updating yourself. new route => router.patch(/users/me) => DONE
 //Deleting yourself. new route => router.delete(/users/me) => DONE
 //Updating and deleting your own blogs => DONE
-//hide jwt secret key in env file
+//hide jwt secret key in env  => DONE
 
 
 const mongoose  = require('mongoose')

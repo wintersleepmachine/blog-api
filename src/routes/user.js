@@ -8,7 +8,7 @@ const router = new express.Router()
 router.post('/users/sign-up', async (req, res) => {
     const user = new User(req.body)
     try{
-        const token = await user.generateAuthToken()
+        const token = await user.generateAuthToken() //This will generate a jwt and add it to the newly created users array
         await user.save()
         res.status(201).send({user, token})
     }catch(e){
@@ -19,7 +19,7 @@ router.post('/users/sign-up', async (req, res) => {
 //Login in users
 router.post('/users/login', async (req, res) => {
     try{
-        const user = await User.findByCredentials(req.body.email, req.body.password)
+        const user = await User.findByCredentials(req.body.email, req.body.password) //Finds user by email first, then compares the typed password to the hashed password. Returns user if match.
         const token = await user.generateAuthToken()
 
         res.send({user, token})
@@ -32,7 +32,7 @@ router.post('/users/login', async (req, res) => {
 // Logging out user
 router.post('/users/logout', auth, async(req, res) => {
     try {   
-        req.user.tokens = req.user.tokens.filter((token) => {
+        req.user.tokens = req.user.tokens.filter((token) => { //Deleting the specific token from the users token array
             return token.token !== req.token
         })
 
@@ -46,7 +46,7 @@ router.post('/users/logout', auth, async(req, res) => {
 //Logout All
 router.post('/users/logout-all', auth, async (req, res) => {
     try {
-        req.user.tokens = []
+        req.user.tokens = [] //Deleting all the tokens from the users array
         await req.user.save()
 
         res.status(200).send({message: 'Sucessfully logged out of all devices'})
@@ -65,7 +65,7 @@ router.get('/users/me', auth, async (req, res) => {
 })
 
 //Get another users profile
-router.get('/users/:id', auth, async (req, res) => {
+router.get('/users/:id', auth, async (req, res) => { //user must be logged in and authenticted first before making this request
     const {id} = req.params
 
     try {
@@ -76,7 +76,7 @@ router.get('/users/:id', auth, async (req, res) => {
     }
 })
 
-//updating individual user //Updating yourself
+//updating individual users own profile. 
 router.patch('/users/me', auth, async (req, res) => {
     
     //This is block is to determine whether the updates are valid
@@ -91,12 +91,13 @@ router.patch('/users/me', auth, async (req, res) => {
     try{
         //Updating the user property from the req.body object
         updates.forEach((update) => {
-            if(update === 'subscribedTo' && !req.user.subscribedTo.includes(req.body[update])){
+            if(update === 'subscribedTo' && !req.user.subscribedTo.includes(req.body[update])){ //Adding user ObjectIds to subscribedTo array.
                 req.user.subscribedTo = [...req.user.subscribedTo, req.body[update]]
+            }else if(update === 'subscribedTo' && req.user.subscribedTo.includes(req.body[update])){
+                return ;
             }else{
-                req.user[update] = req.body[update]
+                req.user[update] = req.body[update] //Updating any other property
             }
-
         })
 
         await req.user.save()

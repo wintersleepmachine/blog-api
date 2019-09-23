@@ -28,25 +28,16 @@ router.get('/blogs/me', auth, async (req, res) => {
     }
 })
 
-
-// NEED TO FINISH
-
 // Get all blogs user is subscribed to
 router.get('/blogs', auth, async (req, res) => {
-    let blogs = []
     try {
-        req.user.subscribedTo.forEach(async (id) => {
-            const ownersBlogs = await Blog.find({owner:id})
-            blogs = [...blogs, ...ownersBlogs]
-        })
-        console.log(blogs)
+        const blogs = await Blog.find({owner:{$in: req.user.subscribedTo}}) //Get all blogs with an array of user ids
         res.send(blogs)
     }catch(e){
         res.status(500).send(e)
     }
 }) 
 
-//
 
 //Get individual blog
 router.get('/blogs/:id', auth, async (req, res) => {
@@ -91,7 +82,7 @@ router.patch('/blogs/:id', auth, async (req, res) => {
     }
 })
 
-//Deleting an indavidual own blog
+//Deleting an individual own blog
 router.delete('/blogs/:id', auth, async(req, res) => {
     const {id} = req.params
     try {
