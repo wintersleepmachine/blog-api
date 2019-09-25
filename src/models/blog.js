@@ -14,6 +14,13 @@ const blogSchema = new mongoose.Schema({
     owner: {
         type: mongoose.Schema.Types.ObjectId,
         required: true
+    },
+    picture: {
+        type: Buffer
+    },
+    votes: {
+        type: Number,
+        default: 0
     }
 }, {timestamps: true})
 
